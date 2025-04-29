@@ -144,7 +144,3 @@ Para lidar com a ruptura causada pela pandemia, foram adotadas duas janelas de t
 ## Licença
 
 Este projeto é disponibilizado sob a licença MIT.
-
----
-
-Desenvolvido com base em dados do Maven Analytics Data Playground - Global Electronics Retailer.
