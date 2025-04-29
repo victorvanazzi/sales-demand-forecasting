@@ -109,6 +109,16 @@ Para lidar com a ruptura causada pela pandemia, foram adotadas duas janelas de t
 | SARIMA  | 350.027 | 384.946 | 0,5313 |
 | Prophet | 278.796 | 298.397 | 0,7203 |
 
+### Visualizações das Previsões:
+
+#### Previsão SARIMA (Período Pré-Pandemia)
+![image](https://github.com/user-attachments/assets/706464a8-ba3c-4424-93b3-693fdb4a0ff5)
+
+#### Previsão Prophet (Período Pré-Pandemia)
+![image](https://github.com/user-attachments/assets/0e8b6bb5-c75f-4c11-b33a-8727e3be6466)
+
+
+
 ## Principais Conclusões
 
 - **Prophet superou SARIMA** em todos os indicadores para o período pré-pandemia
