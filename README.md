@@ -1,86 +1,150 @@
-# Projeto de Previsão de Demanda em Rede Varejista
+# Previsão de Vendas em Varejista Global de Eletrônicos
 
-## Visão Geral
+![Databricks](https://img.shields.io/badge/Databricks-FF3621?style=for-the-badge&logo=Databricks&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Delta Lake](https://img.shields.io/badge/Delta_Lake-00ADD8?style=for-the-badge&logo=delta&logoColor=white)
+![Prophet](https://img.shields.io/badge/Prophet-007ACC?style=for-the-badge&logo=prophet&logoColor=white)
+![SARIMA](https://img.shields.io/badge/SARIMA-4B275F?style=for-the-badge&logo=statsmodels&logoColor=white)
 
-Este projeto tem como objetivo desenvolver um modelo de previsão de demanda para uma rede varejista, utilizando dados históricos de vendas, informações sobre clientes, produtos, lojas e taxas de câmbio. O projeto é dividido em duas fases principais: desenvolvimento local com Python e escalonamento no Databricks.
+## Sobre o Projeto
 
-## Fases do Projeto
+Este projeto implementa um pipeline completo de análise e modelagem preditiva para vendas mensais de uma rede varejista global de eletrônicos. Utilizando a arquitetura Medallion (Bronze → Silver → Gold) no Databricks, o trabalho abrange desde a ingestão dos dados brutos até a geração de previsões com modelos de séries temporais.
 
-### 1. Desenvolvimento Local com Python
+### Desafio
 
-Nesta fase, o foco é explorar, limpar e preparar os dados, além de desenvolver e testar modelos de previsão em um ambiente local.
+Prever vendas mensais com precisão, considerando:
+- Sazonalidade nas vendas de eletrônicos
+- Impacto da pandemia COVID-19 no período final da série de dados
+- Necessidade de validar modelos em cenários pré-pandemia e durante a pandemia
 
--   **Análise Exploratória de Dados (EDA):** Compreensão dos dados, identificação de padrões, sazonalidades e tendências.
--   **Limpeza de Dados:** Tratamento de valores ausentes, outliers e inconsistências.
--   **Engenharia de Features:** Criação de novas variáveis relevantes para o modelo, como lags, rolling means e flags temporais.
--   **Modelagem:** Desenvolvimento de modelos de previsão utilizando bibliotecas como Pandas e Scikit-learn.
-- **Visualização:** Criação de visualizações utilizando Matplotlib e Seaborn
--   **Validação Cruzada:** Utilização de técnicas como Rolling ou Expanding Window para avaliar o desempenho dos modelos em séries temporais.
--   **Ajuste de Hiperparâmetros:** Otimização dos modelos através de métodos como GridSearchCV, RandomizedSearchCV ou Optuna.
+### Origem dos Dados
 
-### 2. Escalonamento no Databricks
+Dados obtidos do [Maven Analytics Data Playground](https://mavenanalytics.io/data-playground) - Global Electronics Retailer.
 
-Nesta fase, o projeto é escalonado para um ambiente de processamento distribuído, o Databricks.
+## Arquitetura
 
--   **Ingestão de Dados:** Carregamento dos dados tratados para o Databricks (com a possibilidade de utilização do Delta Lake).
--   **Reimplementação com PySpark:** Conversão do pipeline de processamento de dados para PySpark.
--   **Modelagem com Spark MLlib:** Treinamento dos modelos de previsão utilizando as ferramentas do Spark MLlib.
--   **Visualizações e Dashboards:** Criação de dashboards interativos e visualizações utilizando Databricks SQL ou display API.
+O projeto segue a arquitetura Medallion do Databricks:
 
-## Estrutura dos Dados
-
-O projeto utiliza dados de cinco tabelas principais:
-
--   **Sales (Vendas):** Registros de vendas com informações de data, cliente, loja, produto, quantidade e moeda.
--   **Customers (Clientes):** Informações demográficas dos clientes (nome, gênero, cidade, estado, país, continente, data de nascimento).
--   **Products (Produtos):** Detalhes dos produtos, incluindo nome, marca, cor, custo unitário, preço unitário, categoria e subcategoria.
--   **Stores (Lojas):** Informações geográficas e estruturais das lojas (país, estado, área em metros quadrados, data de abertura).
--   **Exchange Rates (Taxas de Câmbio):** Taxas de conversão de moedas para USD ao longo do tempo.
-
-## Pipeline do Projeto
-
-1.  **Carregamento e Integração:** Leitura dos dados e merge entre as tabelas. Conversão de moeda para USD.
-2.  **Análise Exploratória (EDA):** Verificação de sazonalidade, tendência e padrões. Geração de gráficos e estatísticas descritivas.
-3.  **Pré-processamento:** Tratamento de dados ausentes, conversão de tipos e criação de colunas temporais.
-4.  **Feature Engineering:** Criação de variáveis de lag, rolling mean e flags temporais.
-5.  **Modelos de Previsão:** Implementação de baselines estatísticos e modelos supervisionados.
-6.  **Ajuste de Hiperparâmetros:** Otimização dos modelos.
-7.  **Escalonamento no Databricks:** Reimplementação do pipeline com PySpark e treinamento com Spark MLlib.
-
-## Estrutura de Arquivos
-
-
-
-1.  **Carregamento e Integração:** Leitura dos dados e merge entre as tabelas. Conversão de moeda para USD.
-2.  **Análise Exploratória (EDA):** Verificação de sazonalidade, tendência e padrões. Geração de gráficos e estatísticas descritivas.
-3.  **Pré-processamento:** Tratamento de dados ausentes, conversão de tipos e criação de colunas temporais.
-4.  **Feature Engineering:** Criação de variáveis de lag, rolling mean e flags temporais.
-5.  **Modelos de Previsão:** Implementação de baselines estatísticos e modelos supervisionados.
-6.  **Ajuste de Hiperparâmetros:** Otimização dos modelos.
-7.  **Escalonamento no Databricks:** Reimplementação do pipeline com PySpark e treinamento com Spark MLlib.
-
-## Tecnologias Utilizadas
-
--   **Python:** Pandas, Scikit-learn, Matplotlib, Seaborn.
--   **PySpark e Spark MLlib:** Para processamento e modelagem no Databricks.
--   **GridSearchCV, RandomizedSearchCV, Optuna:** Para ajuste de hiperparâmetros.
--   **Databricks SQL:** Para visualizações e dashboards.
--   **YAML:** Para arquivos de configuração.
--   **Delta Lake (opcional):** Para armazenamento de dados no Databricks.
--   **pytest:** Para teste de qualidade.
-
-## Estrutura de Arquivos
 ```
-previsao_demanda/
-├── data/               # raw, processed, features
-├── notebooks/          # 01 a 07 (EDA, pré-processamento, engenharia, modelos, tuning)
-├── scripts/            # Modularização das funções usadas
-├── config/             # config.yaml
-├── databricks/         # scripts para ingestão, modelagem e dashboards no ambiente Spark
-├── reports/            # resultados, gráficos, imagens
-├── README.md           # instruções do projeto
-├── CHANGELOG.md        # controle de versões
+Raw Data → Bronze → Silver → Gold → Modelos Preditivos
+    ↑          ↑        ↑        ↑          ↑
+Ingestão    Validação  Joins   Agregação  Previsão
+           Schema     Limpeza  Métricas
 ```
-## Contribuindo
 
-Contribuições para este projeto são bem-vindas! Consulte o arquivo `CHANGELOG.md` para acompanhar as atualizações.
+## Tabelas e Estrutura de Dados
+
+O conjunto de dados inclui as seguintes tabelas:
+
+### Tabela: Sales (Vendas)
+- `Order Number`, `Line Item`, `Order Date`, `Delivery Date`
+- `CustomerKey`, `StoreKey`, `ProductKey`, `Quantity`, `Currency Code`
+
+### Tabela: Customers (Clientes)
+- `CustomerKey`, `Name`, `Gender`, `City`, `State`
+- `Country`, `Continent`, `Birthday`
+
+### Tabela: Products (Produtos)
+- `ProductKey`, `Product Name`, `Brand`, `Color`
+- `Unit Cost USD`, `Unit Price USD`, `Category`, `Subcategory`
+
+### Tabela: Stores (Lojas)
+- `StoreKey`, `Country`, `State`, `Square Meters`, `Open Date`
+
+### Tabela: Exchange Rates (Taxas de Câmbio)
+- `Date`, `Currency`, `Exchange`
+
+## Pipeline de Processamento
+
+### 1. Camada Bronze (Ingestão)
+
+- Ingestão de arquivos CSV brutos
+- Padronização dos dados
+- Armazenamento em formato Delta
+- Registro no catálogo SQL
+
+### 2. Camada Silver (Transformação)
+
+- Joins entre tabelas Bronze
+- Conversão de valores para USD usando taxas de câmbio
+- Tratamento de nulos e inconsistências de dados
+- Armazenamento em Delta Tables para análise posterior
+
+### 3. Camada Gold (Agregação)
+
+- Agregação mensal das vendas totais em USD
+- Geração de série temporal contínua
+- Preparação dos dados para modelagem
+
+## Modelagem e Análise
+
+### Abordagem Metodológica
+
+Para lidar com a ruptura causada pela pandemia, foram adotadas duas janelas de treinamento/teste:
+
+1. **Cenário Pré-Pandemia**
+   - Treino: 2016-2018
+   - Teste: 2019
+
+2. **Cenário Pandêmico**
+   - Treino: 2016-2019
+   - Teste: 2020-Fev/2021
+
+### Modelos Implementados
+
+#### 1. SARIMA (Seasonal ARIMA)
+- Implementação via statsmodels
+- Tratamento de outliers nos resíduos
+- Ajuste de parâmetros para capturar sazonalidade
+
+#### 2. Prophet (Facebook/Meta)
+- Modelagem de tendência, sazonalidade e feriados
+- Decomposição automática de componentes da série
+- Intervalos de confiança para previsões
+
+### Resultados Comparativos (Cenário Pré-Pandemia)
+
+| Modelo  | MAE     | RMSE    | R²     |
+|---------|---------|---------|--------|
+| SARIMA  | 350.027 | 384.946 | 0,5313 |
+| Prophet | 278.796 | 298.397 | 0,7203 |
+
+## Principais Conclusões
+
+- **Prophet superou SARIMA** em todos os indicadores para o período pré-pandemia
+- Ambos os modelos apresentaram dificuldades em prever o choque da pandemia (como esperado)
+- A série temporal apresenta forte sazonalidade anual que foi bem capturada pelo Prophet
+- O modelo final escolhido foi o **Prophet** devido à sua capacidade superior de capturar tendências e sazonalidade
+
+## Execução do Projeto
+
+### Links para Notebooks Databricks
+
+1. [00_bronze_ingestao](https://databricks-prod-cloudfront.cloud.databricks.com/public/4027ec902e239c93eaaa8714f173bcfc/4247253332321926/3571773272081801/4034231636992376/latest.html)
+2. [01_silver_transformacoes](https://databricks-prod-cloudfront.cloud.databricks.com/public/4027ec902e239c93eaaa8714f173bcfc/4247253332321926/3912297781853264/4034231636992376/latest.html)
+3. [02_gold_agregacoes_mensais](https://databricks-prod-cloudfront.cloud.databricks.com/public/4027ec902e239c93eaaa8714f173bcfc/4247253332321926/3912297781853391/4034231636992376/latest.html)
+4. [03a_exploracao_inicial](https://databricks-prod-cloudfront.cloud.databricks.com/public/4027ec902e239c93eaaa8714f173bcfc/4247253332321926/3912297781853357/4034231636992376/latest.html)
+5. [03b_modelagem_sarima](https://databricks-prod-cloudfront.cloud.databricks.com/public/4027ec902e239c93eaaa8714f173bcfc/4247253332321926/3912297781853318/4034231636992376/latest.html)
+6. [03c_modelagem_prophet](https://databricks-prod-cloudfront.cloud.databricks.com/public/4027ec902e239c93eaaa8714f173bcfc/4247253332321926/3912297781853344/4034231636992376/latest.html)
+
+## Requisitos
+
+- Databricks Runtime 10.4 LTS ou superior
+- Python 3.8+
+- Bibliotecas: pandas, numpy, statsmodels, prophet, matplotlib, seaborn
+
+## Trabalhos Futuros
+
+- Incorporação de variáveis exógenas (indicadores econômicos, feriados regionais)
+- Teste de modelos híbridos considerando mudanças de regime
+- Implementação de validação cruzada com janela rolante
+- Agregações em diferentes níveis (categoria de produto, região geográfica)
+- Experimentação com modelos mais avançados (LSTM, modelos híbridos)
+
+## Licença
+
+Este projeto é disponibilizado sob a licença MIT.
+
+---
+
+Desenvolvido com base em dados do Maven Analytics Data Playground - Global Electronics Retailer.
