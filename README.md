@@ -1,156 +1,113 @@
-# Previsão de Vendas em Varejista Global de Eletrônicos
+# Previsão de Demanda de Vendas
 
-![Databricks](https://img.shields.io/badge/Databricks-FF3621?style=for-the-badge&logo=Databricks&logoColor=white)
-![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![Delta Lake](https://img.shields.io/badge/Delta_Lake-00ADD8?style=for-the-badge&logo=delta&logoColor=white)
-![Prophet](https://img.shields.io/badge/Prophet-007ACC?style=for-the-badge&logo=prophet&logoColor=white)
-![SARIMA](https://img.shields.io/badge/SARIMA-4B275F?style=for-the-badge&logo=statsmodels&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.7+-blue.svg)
+![Databricks](https://img.shields.io/badge/Databricks-PySpark-orange.svg)
+![Modelos](https://img.shields.io/badge/Modelos-SARIMA|Prophet-green.svg)
+![Status](https://img.shields.io/badge/Status-Completo-brightgreen.svg)
 
-## Sobre o Projeto
+> Previsão de demanda mensal para uma varejista global de eletrônicos, com foco na seleção do melhor modelo de séries temporais para projeções de vendas agregadas.
 
-Este projeto implementa um pipeline completo de análise e modelagem preditiva para vendas mensais de uma rede varejista global de eletrônicos. Utilizando a arquitetura Medallion (Bronze → Silver → Gold) no Databricks, o trabalho abrange desde a ingestão dos dados brutos até a geração de previsões com modelos de séries temporais.
+## Ecossistema de Projetos
 
-### Desafio
+Este repositório faz parte de um ecossistema com três projetos modulares:
 
-Prever vendas mensais com precisão, considerando:
-- Sazonalidade nas vendas de eletrônicos
-- Impacto da pandemia COVID-19 no período final da série de dados
-- Necessidade de validar modelos em cenários pré-pandemia e durante a pandemia
+| Repositório                      | Função                    | Descrição                                                      |
+|----------------------------------|---------------------------|----------------------------------------------------------------|
+| [`core-data-pipeline`](https://github.com/seuusuario/core-data-pipeline)     | Ingestão e Transformação | Pipeline de dados com arquitetura Medallion (Bronze → Silver → Gold) |
+| [`sales-performance-bi`](https://github.com/seuusuario/sales-performance-bi) | Visualização             | Análise de desempenho comercial no Power BI                    |
+| **`sales-demand-forecasting`**   | Modelagem Preditiva       | **Previsão de vendas mensais com séries temporais**            |
 
-### Origem dos Dados
-
-Dados obtidos do [Maven Analytics Data Playground](https://mavenanalytics.io/data-playground) - Global Electronics Retailer.
-
-## Arquitetura
-
-O projeto segue a arquitetura Medallion do Databricks:
+## Estrutura do Repositório
 
 ```
-Raw Data → Bronze → Silver → Gold → Modelos Preditivos
-    ↑          ↑        ↑        ↑          ↑
-Ingestão    Validação  Joins   Agregação  Previsão
-           Schema     Limpeza  Métricas
+
+sales-demand-forecasting/
+│
+├── notebooks/
+│   ├── 03a\_exploracao\_inicial.ipynb    # Análise exploratória da série temporal
+│   ├── 03b\_modelagem\_sarima.ipynb      # Modelagem SARIMA com validação temporal
+│   └── 03c\_modelagem\_prophet.ipynb     # Implementação do Prophet sem e com feriados
+│
+└── README.md                           # Documentação do projeto
+
 ```
 
-## Tabelas e Estrutura de Dados
+## Objetivo
 
-O conjunto de dados inclui as seguintes tabelas:
+Selecionar o modelo de previsão com melhor desempenho para a série `sales_monthly`, que representa o faturamento mensal (USD) de uma varejista global de eletrônicos.
 
-### Tabela: Sales (Vendas)
-- `Order Number`, `Line Item`, `Order Date`, `Delivery Date`
-- `CustomerKey`, `StoreKey`, `ProductKey`, `Quantity`, `Currency Code`
+## Metodologia
 
-### Tabela: Customers (Clientes)
-- `CustomerKey`, `Name`, `Gender`, `City`, `State`
-- `Country`, `Continent`, `Birthday`
+### 1. Análise Exploratória
 
-### Tabela: Products (Produtos)
-- `ProductKey`, `Product Name`, `Brand`, `Color`
-- `Unit Cost USD`, `Unit Price USD`, `Category`, `Subcategory`
+- **Visualização**: Gráficos temporais e análise de dispersão  
+- **Decomposição**: Isolamento de tendência, sazonalidade e resíduos via STL  
+- **Diagnóstico**: Identificação de outliers e comportamentos atípicos, especialmente durante a pandemia  
 
-### Tabela: Stores (Lojas)
-- `StoreKey`, `Country`, `State`, `Square Meters`, `Open Date`
+### 2. Modelagem SARIMA
 
-### Tabela: Exchange Rates (Taxas de Câmbio)
-- `Date`, `Currency`, `Exchange`
+- **Pré-processamento**: Tratamento de outliers nos resíduos via winsorização  
+- **Configuração**: SARIMA(1,1,1)(1,1,1,12) com inicialização 'approximate_diffuse'  
+- **Validação**: Expanding Window com 7 folds sequenciais de 3 meses cada  
+- **Métricas**: MAE, RMSE e R² para cada período de validação  
 
-## Pipeline de Processamento
+### 3. Modelagem Prophet
 
-### 1. Camada Bronze (Ingestão)
+- **Variações**: Implementação com e sem feriados dos EUA como variáveis exógenas  
+- **Estrutura**: Mesma abordagem de validação temporal usada no SARIMA  
+- **Sazonalidade**: Configuração com sazonalidade anual automaticamente detectada  
 
-- Ingestão de arquivos CSV brutos
-- Padronização dos dados
-- Armazenamento em formato Delta
-- Registro no catálogo SQL
+### 4. Validação Temporal
 
-### 2. Camada Silver (Transformação)
+- **Fold 1**: Treino até Dez/2018 · Validação Jan–Mar/2019  
+- **Fold 2**: Treino até Mar/2019 · Validação Abr–Jun/2019  
+- **Fold 3**: Treino até Jun/2019 · Validação Jul–Set/2019  
+- **Fold 4**: Treino até Set/2019 · Validação Out–Dez/2019  
+- **Fold 5**: Treino até Dez/2019 · Validação Jan–Mar/2020  
+- **Fold 6**: Treino até Mar/2020 · Validação Abr–Jun/2020  
+- **Fold 7**: Treino até Jun/2020 · Validação Jul–Set/2020  
 
-- Joins entre tabelas Bronze
-- Conversão de valores para USD usando taxas de câmbio
-- Tratamento de nulos e inconsistências de dados
-- Armazenamento em Delta Tables para análise posterior
+## Resultados
 
-### 3. Camada Gold (Agregação)
+| Período       | Contexto              | Melhor Modelo | R²            | MAE    |
+|---------------|-----------------------|---------------|---------------|--------|
+| Jan–Jun 2019  | Estabilidade          | **SARIMA**    | 0.67 / 0.71   | 263k / 274k |
+| Jul–Set 2019  | Baixa variabilidade   | **SARIMA**    | 0.01          | 44k    |
+| Out–Dez 2019  | Sazonalidade definida | **SARIMA**    | 0.89          | 111k   |
+| Jan–Mar 2020  | Início da pandemia    | **SARIMA**    | 0.83          | 261k   |
+| Abr–Set 2020  | Ruptura COVID-19      | Nenhum        | R² negativo   | >500k  |
 
-- Agregação mensal das vendas totais em USD
-- Geração de série temporal contínua
-- Preparação dos dados para modelagem
+## Modelo Promovido
 
-## Modelagem e Análise
+**SARIMA** foi adotado como modelo de produção, por apresentar:
 
-### Abordagem Metodológica
+- **Maior precisão**: Menores erros absolutos em todos os períodos estáveis  
+- **Explicabilidade**: Maior R² na maioria dos folds analisados  
+- **Robustez**: Melhor desempenho frente a mudanças moderadas de comportamento  
+- **Adaptabilidade**: Capacidade superior de ajuste a variações sazonais  
 
-Para lidar com a ruptura causada pela pandemia, foram adotadas duas janelas de treinamento/teste:
+## Tecnologias e Ferramentas
 
-1. **Cenário Pré-Pandemia**
-   - Treino: 2016-2018
-   - Teste: 2019
+| Categoria            | Ferramentas                           |
+|----------------------|---------------------------------------|
+| **Linguagem**        | Python 3.7+                           |
+| **Ambiente**         | Databricks com PySpark               |
+| **Análise de Dados** | pandas, NumPy, Matplotlib             |
+| **Modelagem**        | statsmodels (SARIMA), Prophet         |
+| **Validação**        | Expanding Window com 7 folds temporais |
+| **Métricas**         | MAE, RMSE, R²                         |
 
-2. **Cenário Pandêmico**
-   - Treino: 2016-2019
-   - Teste: 2020-Fev/2021
+## Insights Principais
 
-### Modelos Implementados
+- **Sazonalidade anual**: Padrões recorrentes de alta e baixa nas vendas  
+- **Limitação de modelos estatísticos**: Falha na previsão de eventos extremos como a pandemia  
+- **Superioridade do SARIMA**: Melhor adaptação aos padrões da série temporal específica  
+- **Adição de feriados**: Não melhorou significativamente o desempenho do Prophet  
 
-#### 1. SARIMA (Seasonal ARIMA)
-- Implementação via statsmodels
-- Tratamento de outliers nos resíduos
-- Ajuste de parâmetros para capturar sazonalidade
+## Observações
 
-#### 2. Prophet (Facebook/Meta)
-- Modelagem de tendência, sazonalidade e feriados
-- Decomposição automática de componentes da série
-- Intervalos de confiança para previsões
+- Os dados foram extraídos do [Maven Analytics Data Playground](https://www.mavenanalytics.io/data-playground)
+- Os dados utilizados vão até fevereiro de 2021, impossibilitando a validação completa pós-pandemia  
+---
 
-### Resultados Comparativos (Cenário Pré-Pandemia)
-
-| Modelo  | MAE     | RMSE    | R²     |
-|---------|---------|---------|--------|
-| SARIMA  | 350.027 | 384.946 | 0,5313 |
-| Prophet | 278.796 | 298.397 | 0,7203 |
-
-### Visualizações das Previsões:
-
-#### Previsão SARIMA (Período Pré-Pandemia)
-![image](https://github.com/user-attachments/assets/706464a8-ba3c-4424-93b3-693fdb4a0ff5)
-
-#### Previsão Prophet (Período Pré-Pandemia)
-![image](https://github.com/user-attachments/assets/0e8b6bb5-c75f-4c11-b33a-8727e3be6466)
-
-
-
-## Principais Conclusões
-
-- **Prophet superou SARIMA** em todos os indicadores para o período pré-pandemia
-- Ambos os modelos apresentaram dificuldades em prever o choque da pandemia (como esperado)
-- A série temporal apresenta forte sazonalidade anual que foi bem capturada pelo Prophet
-- O modelo final escolhido foi o **Prophet** devido à sua capacidade superior de capturar tendências e sazonalidade
-
-## Execução do Projeto
-
-### Links para Notebooks Databricks
-
-1. [00_bronze_ingestao](https://databricks-prod-cloudfront.cloud.databricks.com/public/4027ec902e239c93eaaa8714f173bcfc/4247253332321926/3571773272081801/4034231636992376/latest.html)
-2. [01_silver_transformacoes](https://databricks-prod-cloudfront.cloud.databricks.com/public/4027ec902e239c93eaaa8714f173bcfc/4247253332321926/3912297781853264/4034231636992376/latest.html)
-3. [02_gold_agregacoes_mensais](https://databricks-prod-cloudfront.cloud.databricks.com/public/4027ec902e239c93eaaa8714f173bcfc/4247253332321926/3912297781853391/4034231636992376/latest.html)
-4. [03a_exploracao_inicial](https://databricks-prod-cloudfront.cloud.databricks.com/public/4027ec902e239c93eaaa8714f173bcfc/4247253332321926/3912297781853357/4034231636992376/latest.html)
-5. [03b_modelagem_sarima](https://databricks-prod-cloudfront.cloud.databricks.com/public/4027ec902e239c93eaaa8714f173bcfc/4247253332321926/3912297781853318/4034231636992376/latest.html)
-6. [03c_modelagem_prophet](https://databricks-prod-cloudfront.cloud.databricks.com/public/4027ec902e239c93eaaa8714f173bcfc/4247253332321926/3912297781853344/4034231636992376/latest.html)
-
-## Requisitos
-
-- Databricks Runtime 10.4 LTS ou superior
-- Python 3.8+
-- Bibliotecas: pandas, numpy, statsmodels, prophet, matplotlib, seaborn
-
-## Trabalhos Futuros
-
-- Incorporação de variáveis exógenas (indicadores econômicos, feriados regionais)
-- Teste de modelos híbridos considerando mudanças de regime
-- Implementação de validação cruzada com janela rolante
-- Agregações em diferentes níveis (categoria de produto, região geográfica)
-- Experimentação com modelos mais avançados (LSTM, modelos híbridos)
-
-## Licença
-
-Este projeto é disponibilizado sob a licença MIT.
+*Projeto desenvolvido como demonstração de habilidades em modelagem de séries temporais e previsão de demanda.*  
