@@ -13,8 +13,8 @@ Este repositório faz parte de um ecossistema com três projetos modulares:
 
 | Repositório                      | Função                    | Descrição                                                      |
 |----------------------------------|---------------------------|----------------------------------------------------------------|
-| [`core-data-pipeline`](https://github.com/seuusuario/core-data-pipeline)     | Ingestão e Transformação | Pipeline de dados com arquitetura Medallion (Bronze → Silver → Gold) |
-| [`sales-performance-bi`](https://github.com/seuusuario/sales-performance-bi) | Visualização             | Análise de desempenho comercial no Power BI                    |
+| [`core-data-pipeline`](https://github.com/victorvanazzi/core-data-pipeline)     | Ingestão e Transformação | Pipeline de dados com arquitetura Medallion (Bronze → Silver → Gold) |
+| [`sales-performance-bi`](https://github.com/victorvanazzi/sales-performance-bi) | Visualização             | Análise de desempenho comercial no Power BI                    |
 | **`sales-demand-forecasting`**   | Modelagem Preditiva       | **Previsão de vendas mensais com séries temporais**            |
 
 ## Estrutura do Repositório
